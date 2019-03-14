@@ -1,7 +1,7 @@
-package com.github.rawsanj.service;
+package io.github.tintinrevient.gis.service;
 
-import com.github.rawsanj.config.ApplicationProperties;
-import com.github.rawsanj.model.ChatMessage;
+import io.github.tintinrevient.gis.config.ApplicationProperties;
+import io.github.tintinrevient.gis.model.GisMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -15,7 +15,7 @@ public class WebSocketMessageService {
     private final SimpMessagingTemplate template;
 
 
-    private static final Logger LOG = LoggerFactory.getLogger(WebSocketMessageService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(WebSocketMessageService.class);
 
     public WebSocketMessageService(ApplicationProperties applicationProperties, SimpMessagingTemplate template) {
         this.applicationProperties = applicationProperties;
@@ -23,14 +23,9 @@ public class WebSocketMessageService {
     }
 
     @Async
-    public void sendChatMessage(ChatMessage message) {
-        template.convertAndSend(applicationProperties.getTopic().getMessage(), message);
-    }
-
-    @Async
-    public void sendMessageCount(Integer totalMessage) {
-        LOG.info("Total Messages: {}", totalMessage);
-        template.convertAndSend(applicationProperties.getTopic().getCount(), totalMessage);
+    public void sendGisMessage(GisMessage message) {
+    	   LOGGER.info("Send message via Web Socket: " + message);
+        template.convertAndSend(applicationProperties.getInfo().getMessage(), message);
     }
 
 }

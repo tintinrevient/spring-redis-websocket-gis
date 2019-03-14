@@ -3,43 +3,37 @@ $( document ).ready(function() {
     $('.alert').hide();
 
     var stompClient = null;
-    var messageCount = 0;
     var rowCount = 0;
 
     function setConnected(connected) {
         $("#connect").prop("disabled", connected);
         $("#disconnect").prop("disabled", !connected);
         if (connected) {
-            $("#chatMessage").show();
+            $("#gisMessage").show();
         }
         else {
-            $("#chatMessage").hide();
+            $("#gisMessage").hide();
         }
         $("#messages").html("");
     }
 
     function connect(callback) {
         $('.alert').hide();
-        var socket = new SockJS('/redis-chat');
+        var socket = new SockJS('/redis-gis');
         stompClient = Stomp.over(socket);
 
         stompClient.connect({}, function (frame) {
             setConnected(true);
             console.log('Connected: ' + frame);
-            stompClient.subscribe('/topic/messages', function (chatMessage) {
-                console.log("Message: ", chatMessage);
-                showChatMessage(JSON.parse(chatMessage.body));
-            });
-            stompClient.subscribe('/topic/count', function (totalCount) {
-                console.log("Total: ", totalCount.body);
-                setMessageCount(totalCount.body);
+            stompClient.subscribe('/info/messages', function (gitMessage) {
+                console.log("Message: ", gitMessage);
+                showGisMessage(JSON.parse(gitMessage.body));
             });
             callback();
         }, function(message){
             disconnect();
             $('.alert').show();
         });
-        $("#messageCount").text(messageCount);
     }
 
     function disconnect() {
@@ -52,13 +46,9 @@ $( document ).ready(function() {
         rowCount = 0;
     }
 
-    function setMessageCount(totalCount){
-      $("#message-count").text(totalCount);
-    }
-
-    function showChatMessage(chatMessage) {
+    function showGisMessage(gitMessage) {
         rowCount++;
-        $("#messages").prepend("<tr" +"><td scope='row'> <h6><b>  " +  chatMessage.id  + ".</b></h6> </td> <td> "+ chatMessage.message + "</td><td> "+ chatMessage.hostname + "</td></tr>");
+        $("#messages").prepend("<tr" +"><td scope='row'> <h6><b>  " +  gitMessage.id  + ".</b></h6> </td> <td> "+ gitMessage.message + "</td></tr>");
     }
 
     $("#disconnect").click(function(){
@@ -82,17 +72,31 @@ $( document ).ready(function() {
         }
     });
 
+    function showPosition(position) {
+        document.getElementById("gis-message").value = position.coords.latitude + ", " + position.coords.longitude;
+    }
+
 
     $("#send-ws-message").click(function(){
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showPosition);
+        } else {
+            document.getElementById("gis-message").value = "0.00000, 0.00000";
+        }
         sendMessage();
     });
 
     $("#send-http-message").click(function(){
-        var chatMessage = $("#chat-message").val();
+        if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(showPosition);
+        } else {
+                document.getElementById("gis-message").value = "0.00000, 0.00000";
+        }
+        var gisMessage = $("#gis-message").val();
         $.ajax({
             url:"/message",
             type:"POST",
-            data: JSON.stringify({"message": chatMessage}),
+            data: JSON.stringify({"message": gisMessage}),
             dataType: "json",
             contentType:"application/json",
             success: function(response){
@@ -104,7 +108,7 @@ $( document ).ready(function() {
         })
     });
 
-    $('#chat-message').keypress(function (e) {
+    $('#gis-message').keypress(function (e) {
         var key = e.which;
         if(key == 13){
             sendMessage();
@@ -112,15 +116,15 @@ $( document ).ready(function() {
     });
 
     function sendMessage(){
-        if(stompClient !==null && stompClient.connected){
-            var chatMessage = $("#chat-message").val();
-            stompClient.send("/app/message",{}, chatMessage);
-            $("#chat-message").val("");
+       if(stompClient !==null && stompClient.connected){
+            var gisMessage = $("#gis-message").val();
+            stompClient.send("/app/message",{}, gisMessage);
+            $("#gis-message").val("");
         }else{
             connect(function(){
-                var chatMessage = $("#chat-message").val();
-                stompClient.send("/app/message",{}, chatMessage);
-                $("#chat-message").val("");
+                var gisMessage = $("#gis-message").val();
+                stompClient.send("/app/message",{}, gisMessage);
+                $("#gis-message").val("");
             });
         }
     }

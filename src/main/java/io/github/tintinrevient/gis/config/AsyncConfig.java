@@ -1,12 +1,11 @@
-package com.github.rawsanj.config;
+package io.github.tintinrevient.gis.config;
 
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.lang.reflect.Method;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -14,7 +13,10 @@ import java.util.concurrent.Executors;
 @Configuration
 public class AsyncConfig implements AsyncConfigurer {
 
-  @Override
+	private static final Logger LOGGER = LoggerFactory.getLogger(AsyncConfig.class);
+
+
+	@Override
   public Executor getAsyncExecutor() {
     return new ConcurrentTaskExecutor(
       Executors.newFixedThreadPool(2));
@@ -31,10 +33,10 @@ public class AsyncConfig implements AsyncConfigurer {
     public void handleUncaughtException(
       Throwable throwable, Method method, Object... obj) {
 
-      System.out.println("Exception message - " + throwable.getMessage());
-      System.out.println("Method name - " + method.getName());
+					 LOGGER.warn("Exception message - " + throwable.getMessage());
+					 LOGGER.warn("Method name - " + method.getName());
       for (Object param : obj) {
-        System.out.println("Parameter value - " + param);
+							 LOGGER.warn("Parameter value - " + param);
       }
     }
   }

@@ -1,7 +1,7 @@
-package com.github.rawsanj.config;
+package io.github.tintinrevient.gis.config;
 
-import com.github.rawsanj.listener.RedisReceiver;
-import com.github.rawsanj.service.WebSocketMessageService;
+import io.github.tintinrevient.gis.listener.RedisReceiver;
+import io.github.tintinrevient.gis.service.WebSocketMessageService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,24 +18,17 @@ public class RedisConfig {
 
     @Bean
     RedisMessageListenerContainer container(RedisConnectionFactory connectionFactory,
-                                            @Qualifier("chatMessageListenerAdapter") MessageListenerAdapter chatMessageListenerAdapter,
-                                            @Qualifier("countListenerAdapter") MessageListenerAdapter countListenerAdapter) {
+                                            @Qualifier("gisMessageListenerAdapter") MessageListenerAdapter gisMessageListenerAdapter) {
 
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(connectionFactory);
-        container.addMessageListener(chatMessageListenerAdapter,  new PatternTopic("chat"));
-        container.addMessageListener(countListenerAdapter, new PatternTopic("count"));
+        container.addMessageListener(gisMessageListenerAdapter,  new PatternTopic("gis"));
         return container;
     }
 
-    @Bean("chatMessageListenerAdapter")
-    MessageListenerAdapter chatMessageListenerAdapter(RedisReceiver redisReceiver) {
-        return new MessageListenerAdapter(redisReceiver, "receiveChatMessage");
-    }
-
-    @Bean("countListenerAdapter")
-    MessageListenerAdapter countListenerAdapter(RedisReceiver redisReceiver) {
-        return new MessageListenerAdapter(redisReceiver, "receiveCountMessage");
+    @Bean("gisMessageListenerAdapter")
+    MessageListenerAdapter gisMessageListenerAdapter(RedisReceiver redisReceiver) {
+        return new MessageListenerAdapter(redisReceiver, "receiveGisMessage");
     }
 
     @Bean
@@ -56,9 +49,9 @@ public class RedisConfig {
     }
 
     @Bean // Redis Atomic Counter to store no. of total messages sent from multiple app instances.
-    RedisAtomicInteger getChatMessageCounter(RedisTemplate redisTemplate){
-        RedisAtomicInteger chatMessageCounter = new RedisAtomicInteger("total-chat-message", redisTemplate.getConnectionFactory());
-        return chatMessageCounter;
+    RedisAtomicInteger getGisMessageCounter(RedisTemplate redisTemplate){
+        RedisAtomicInteger gisMessageCounter = new RedisAtomicInteger("total-gis-message", redisTemplate.getConnectionFactory());
+        return gisMessageCounter;
     }
 
 }

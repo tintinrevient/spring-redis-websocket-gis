@@ -1,9 +1,9 @@
-package com.github.rawsanj.controller;
+package io.github.tintinrevient.gis.controller;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.rawsanj.model.ChatMessage;
+import io.github.tintinrevient.gis.model.GisMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -14,9 +14,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.util.Date;
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,16 +24,16 @@ public class MessageController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MessageController.class);
 
-    private final RedisAtomicInteger chatMessageCounter;
+    private final RedisAtomicInteger gisMessageCounter;
     private final StringRedisTemplate stringRedisTemplate;
 
-    public MessageController(RedisAtomicInteger chatMessageCounter, StringRedisTemplate stringRedisTemplate) {
-        this.chatMessageCounter = chatMessageCounter;
+    public MessageController(RedisAtomicInteger gisMessageCounter, StringRedisTemplate stringRedisTemplate) {
+        this.gisMessageCounter = gisMessageCounter;
         this.stringRedisTemplate = stringRedisTemplate;
     }
 
     @MessageMapping("/message")
-    public void sendWsChatMessage(String message) throws JsonProcessingException {
+    public void sendWsGisMessage(String message) throws JsonProcessingException {
         LOGGER.info("Incoming WebSocket Message : {}", message);
 
         publishMessageToRedis(message);
@@ -42,7 +41,7 @@ public class MessageController {
 
     @PostMapping("/message")
     @ResponseBody
-    public ResponseEntity<Map<String, String>> sendHttpChatHttpMessage(@RequestBody Map<String, String> message) throws JsonProcessingException {
+    public ResponseEntity<Map<String, String>> sendHttpGisHttpMessage(@RequestBody Map<String, String> message) throws JsonProcessingException {
         String httpMessage = message.get("message");
         LOGGER.info("Incoming HTTP Message : {}", httpMessage);
         publishMessageToRedis(httpMessage);
@@ -55,22 +54,15 @@ public class MessageController {
 
     private void publishMessageToRedis(String message) throws JsonProcessingException {
 
-        Integer totalChatMessage = chatMessageCounter.incrementAndGet();
-        String hostName = null;
-        try {
-            hostName = InetAddress.getLocalHost().getHostName();
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-            hostName = "localhost";
-        }
+        Integer totalChatMessage = gisMessageCounter.incrementAndGet();
 
-        ChatMessage chatMessage = new ChatMessage(totalChatMessage, message, hostName);
+
+        GisMessage gisMessage = new GisMessage(totalChatMessage, message, new Timestamp((new Date()).getTime()).toString());
         ObjectMapper objectMapper = new ObjectMapper();
-        String chatString = objectMapper.writeValueAsString(chatMessage);
+        String gisString = objectMapper.writeValueAsString(gisMessage);
 
         // Publish Message to Redis Channels
-        stringRedisTemplate.convertAndSend("chat", chatString);
-        stringRedisTemplate.convertAndSend("count", totalChatMessage.toString());
-
+        stringRedisTemplate.convertAndSend("gis",
+									);
     }
 }

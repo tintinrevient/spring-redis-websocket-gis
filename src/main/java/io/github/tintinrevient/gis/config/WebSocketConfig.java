@@ -1,4 +1,4 @@
-package com.github.rawsanj.config;
+package io.github.tintinrevient.gis.config;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,14 +22,14 @@ public class WebSocketConfig extends AbstractWebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry
-                .addEndpoint("/redis-chat")
+                .addEndpoint("/redis-gis")
                 .setAllowedOrigins("*")
                 .withSockJS();
     }
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/topic");
+        config.enableSimpleBroker("/info");
         config.setApplicationDestinationPrefixes("/app");
     }
 

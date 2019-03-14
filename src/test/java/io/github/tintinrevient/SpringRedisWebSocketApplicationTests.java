@@ -1,4 +1,4 @@
-package com.github.rawsanj;
+package io.github.tintinrevient;
 
 public class SpringRedisWebSocketApplicationTests {
 

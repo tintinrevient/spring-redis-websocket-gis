@@ -1,6 +1,6 @@
-package com.github.rawsanj;
+package io.github.tintinrevient.gis;
 
-import com.github.rawsanj.config.ApplicationProperties;
+import io.github.tintinrevient.gis.config.ApplicationProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
