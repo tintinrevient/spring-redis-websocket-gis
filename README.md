@@ -1,7 +1,7 @@
 # spring-redis-websocket-gis
 
 ## Pre-requisite:
-Install and run [Redis] locally:
+Install and run Redis locally:
 ```
 brew install redis
 

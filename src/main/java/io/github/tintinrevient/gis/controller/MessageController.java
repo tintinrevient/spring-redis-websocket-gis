@@ -62,7 +62,6 @@ public class MessageController {
         String gisString = objectMapper.writeValueAsString(gisMessage);
 
         // Publish Message to Redis Channels
-        stringRedisTemplate.convertAndSend("gis",
-									);
+        stringRedisTemplate.convertAndSend("gis", gisString);
     }
 }
